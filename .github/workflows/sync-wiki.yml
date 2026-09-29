@@ -1,0 +1,76 @@
+name: Sync meeting notes to Wiki
+
+# 익스텐션이 wiki-inbox/ 에 올린 회의록(.md)을 위키로 옮기고,
+# 위키 _Sidebar.md 의 <!-- meeting-notes --> 마커 아래에 링크를 추가한 뒤 inbox에서 지웁니다.
+on:
+  push:
+    branches: [main]
+    paths: ["wiki-inbox/**.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-wiki
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: main
+
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Copy notes into wiki and update sidebar
+        run: |
+          shopt -s nullglob
+          files=(main/wiki-inbox/*.md)
+          if [ ${#files[@]} -eq 0 ]; then echo "nothing to sync"; exit 0; fi
+          cp "${files[@]}" wiki/
+
+          python3 - <<'PY'
+          import glob, os
+          MARKER = "<!-- meeting-notes -->"
+          sidebar = "wiki/_Sidebar.md"
+          if not os.path.exists(sidebar):
+              print("::warning::_Sidebar.md 가 없어서 사이드바 링크를 건너뜁니다.")
+              raise SystemExit
+          text = open(sidebar, encoding="utf-8").read()
+          if MARKER not in text:
+              print("::warning::_Sidebar.md 에 <!-- meeting-notes --> 마커가 없어서 사이드바 링크를 건너뜁니다.")
+              raise SystemExit
+          # 파일명 내림차순(=최신 날짜 먼저)으로 처리하면서 마커 바로 아래에 삽입
+          for path in sorted(glob.glob("main/wiki-inbox/*.md")):
+              page = os.path.splitext(os.path.basename(path))[0]
+              if f"|{page}]]" in text:
+                  continue
+              label = (page[:10] + " " + page[11:].replace("-", " ")).strip() if page[:4].isdigit() else page.replace("-", " ")
+              text = text.replace(MARKER, f"{MARKER}\n[[{label}|{page}]] <br>", 1)
+          open(sidebar, "w", encoding="utf-8").write(text)
+          PY
+
+          git -C wiki config user.name "github-actions[bot]"
+          git -C wiki config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C wiki add -A
+          git -C wiki diff --cached --quiet && echo "no wiki changes" || {
+            git -C wiki commit -m "docs: 회의록 동기화 (${GITHUB_SHA::7})"
+            git -C wiki push
+          }
+
+      - name: Clean inbox
+        run: |
+          shopt -s nullglob
+          files=(main/wiki-inbox/*.md)
+          if [ ${#files[@]} -eq 0 ]; then exit 0; fi
+          git -C main rm -q "${files[@]#main/}"
+          git -C main config user.name "github-actions[bot]"
+          git -C main config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C main commit -m "chore: wiki-inbox 정리 [skip ci]"
+          git -C main push
