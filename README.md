@@ -51,7 +51,7 @@
 ```
 capstone/
 ├── docs/            # 발표 자료 등 문서
-├── wiki-inbox/      # 회의록 자동 동기화용 폴더 (건드리지 마세요)
+├── wiki-inbox/      # 회의록 자동 동기화용 폴더
 ├── .github/
 │   └── workflows/   # 회의록 → Wiki 자동 동기화 워크플로
 └── README.md
