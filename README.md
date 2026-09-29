@@ -5,6 +5,7 @@
 **졸업 프로젝트 · 아르바이트 노동자의 권리를 지키는 서비스 '클리어(Clear)'**
 
 [![Wiki](https://img.shields.io/badge/📖_Wiki-회의록·팀_문화-blue)](https://github.com/pudding-lab-2026/capstone/wiki)
+[![Discussions](https://img.shields.io/badge/💬_Discussions-개발_기록·학습_공유-green)](https://github.com/pudding-lab-2026/capstone/discussions)
 
 </div>
 
@@ -12,7 +13,7 @@
 
 > [!NOTE]
 > **현재 기획 단계입니다.** 아직 개발은 시작하지 않았습니다.
-> 이 레포는 팀의 진행 과정, 즉 **회의록**을 투명하게 공유하기 위해 먼저 만들었습니다. 개발이 시작되면 개발 기록도 함께 공유할 예정입니다.
+> 이 레포는 팀의 진행 과정, 즉 **회의록**과 **개발 기록(학습 기록 포함)**을 투명하게 공유하기 위해 먼저 만들었습니다.
 
 ## 📌 바로가기
 
@@ -20,6 +21,7 @@
 | --- | --- | --- |
 | 📑 **회의록** | 정기·긴급 회의 기록 (묶음별 정리) | [Wiki 열기](https://github.com/pudding-lab-2026/capstone/wiki) |
 | ⛺️ **그라운드 룰** | 팀 운영 규칙, 역할, 의사결정 방식 | [그라운드 룰](https://github.com/pudding-lab-2026/capstone/wiki/그라운드-룰) |
+| 💬 **개발 기록** | 개발 아이디어, 학습 공유, AI 랩 등 | [Discussions](https://github.com/pudding-lab-2026/capstone/discussions) |
 | 🏖️ **그룹 회고** | KPT 회고 | [아이디어 연습 세션 회고](https://github.com/pudding-lab-2026/capstone/wiki/아이디어-연습-세션-회고) |
 
 ## 🎯 프로젝트 소개
