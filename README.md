@@ -4,8 +4,8 @@
 
 **졸업 프로젝트 · 아르바이트 노동자의 권리를 지키는 서비스 '클리어(Clear)'**
 
-[![Wiki](https://img.shields.io/badge/📖_Wiki-회의록·팀_문화-blue)](https://github.com/pudding-lab-2026/capstone/wiki)
-[![Discussions](https://img.shields.io/badge/💬_Discussions-개발_기록·학습_공유-green)](https://github.com/pudding-lab-2026/capstone/discussions)
+[![Wiki](https://img.shields.io/badge/📖_Wiki-회의록·팀_문화-F7D774?labelColor=9C5A26&style=flat-square)](https://github.com/pudding-lab-2026/capstone/wiki)
+[![Discussions](https://img.shields.io/badge/💬_Discussions-개발_기록·학습_공유-F2A7A0?labelColor=9C5A26&style=flat-square)](https://github.com/pudding-lab-2026/capstone/discussions)
 
 </div>
 
