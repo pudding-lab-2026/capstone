@@ -61,7 +61,7 @@ jobs:
             | {
                 allowed_mentions: {parse: []},
                 embeds: [ $e.pages[] | {
-                  title: (if .action == "created" then "🆕 위키 페이지가 추가됐어요: " else "✏️ 위키 페이지가 수정됐어요: " end) + .title,
+                  title: ((if .action == "created" then "🆕 위키 페이지가 추가됐어요: " else "✏️ 위키 페이지가 수정됐어요: " end) + .title),
                   url: .html_url,
                   description: (.summary // ""),
                   color: ($color | tonumber),

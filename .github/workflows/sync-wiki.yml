@@ -86,7 +86,7 @@ jobs:
               {
                 allowed_mentions: {parse: []},
                 embeds: [{
-                  title: (if $status == "A" then "🆕 위키 페이지가 추가됐어요: " else "✏️ 위키 페이지가 수정됐어요: " end) + $page,
+                  title: ((if $status == "A" then "🆕 위키 페이지가 추가됐어요: " else "✏️ 위키 페이지가 수정됐어요: " end) + $page),
                   url: "https://github.com/\($repo)/wiki/\($page | @uri)",
                   color: ($color | tonumber),
                   author: {name: $actor, icon_url: "https://github.com/\($actor).png"}
