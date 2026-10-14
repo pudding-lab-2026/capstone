@@ -1,7 +1,7 @@
 name: Discord notify
 
 # Discussion(생성/수정/댓글)과 Wiki(생성/수정) 이벤트를 디스코드로 알립니다.
-# 레포 Settings > Secrets and variables > Actions 에 DISCORD_WEBHOOK_URL 을 등록해야 합니다.
+# 레포 Settings > Secrets and variables > Actions 에 DISCORD_DISCUSSION_WIKI_WEBHOOK 을 등록해야 합니다.
 # (디스코드 웹훅 URL 그대로, 끝에 /github 를 붙이지 않습니다.)
 on:
   discussion:
@@ -13,7 +13,7 @@ on:
 permissions: {}
 
 env:
-  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_DISCUSSION_WIKI_WEBHOOK }}
   COLOR: "16635957"
 
 jobs:
