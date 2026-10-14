@@ -60,9 +60,39 @@ jobs:
           git -C wiki config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git -C wiki add -A
           git -C wiki diff --cached --quiet && echo "no wiki changes" || {
+            # 디스코드 알림용: 추가(A)/수정(M)된 페이지 목록
+            git -C wiki -c core.quotepath=false diff --cached --name-status > "$RUNNER_TEMP/wiki-changes.txt"
             git -C wiki commit -m "docs: 회의록 동기화 (${GITHUB_SHA::7})"
             git -C wiki push
           }
+
+      # 이 푸시는 GITHUB_TOKEN 으로 일어나서 gollum 워크플로가 실행되지 않으므로 여기서 직접 알립니다.
+      - name: Notify Discord
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_DISCUSSION_WIKI_WEBHOOK }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.actor }}
+          COLOR: "16635957"
+        run: |
+          f="$RUNNER_TEMP/wiki-changes.txt"
+          [ -s "$f" ] || { echo "no wiki changes to notify"; exit 0; }
+          while IFS=$'\t' read -r status path; do
+            case "$path" in _*|*/*|"") continue ;; esac
+            case "$path" in *.md) ;; *) continue ;; esac
+            page="${path%.md}"
+            jq -n --arg status "$status" --arg page "$page" --arg repo "$REPO" \
+                  --arg actor "$ACTOR" --arg color "$COLOR" '
+              {
+                allowed_mentions: {parse: []},
+                embeds: [{
+                  title: (if $status == "A" then "🆕 위키 페이지가 추가됐어요: " else "✏️ 위키 페이지가 수정됐어요: " end) + $page,
+                  url: "https://github.com/\($repo)/wiki/\($page | @uri)",
+                  color: ($color | tonumber),
+                  author: {name: $actor, icon_url: "https://github.com/\($actor).png"}
+                }]
+              }' | curl -sS --fail -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
+          done < "$f"
 
       - name: Clean inbox
         run: |
