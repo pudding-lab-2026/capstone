@@ -1,0 +1,70 @@
+name: Discord notify
+
+# Discussion(생성/수정/댓글)과 Wiki(생성/수정) 이벤트를 디스코드로 알립니다.
+# 레포 Settings > Secrets and variables > Actions 에 DISCORD_WEBHOOK_URL 을 등록해야 합니다.
+# (디스코드 웹훅 URL 그대로, 끝에 /github 를 붙이지 않습니다.)
+on:
+  discussion:
+    types: [created, edited]
+  discussion_comment:
+    types: [created]
+  gollum:
+
+permissions: {}
+
+env:
+  DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+  COLOR: "16635957"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      # 이벤트 값은 셸에 직접 끼워넣지 않고 $GITHUB_EVENT_PATH(JSON)에서 jq로 읽습니다.
+      - name: Discussion
+        if: github.event_name == 'discussion'
+        run: |
+          jq -n --slurpfile e "$GITHUB_EVENT_PATH" --arg color "$COLOR" '
+            def cut: (. // "") | .[0:200] + (if length > 200 then "…" else "" end);
+            $e[0] as $e
+            | {
+                content: (if $e.action == "created" then "🆕 새 Discussion이 올라왔어요!" else "✏️ Discussion이 수정됐어요" end),
+                allowed_mentions: {parse: []},
+                embeds: [{
+                  author: {name: $e.sender.login, icon_url: $e.sender.avatar_url},
+                  description: "**카테고리** : \($e.discussion.category.name)\n**제목** : [#\($e.discussion.number) \($e.discussion.title)](\($e.discussion.html_url))\n**내용** : \($e.discussion.body | cut)",
+                  color: ($color | tonumber)
+                }]
+              }' | curl -sS --fail -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
+
+      - name: Discussion comment
+        if: github.event_name == 'discussion_comment'
+        run: |
+          jq -n --slurpfile e "$GITHUB_EVENT_PATH" --arg color "$COLOR" '
+            def cut: (. // "") | .[0:200] + (if length > 200 then "…" else "" end);
+            $e[0] as $e
+            | {
+                content: "💬 Discussion에 새 댓글이 달렸어요!",
+                allowed_mentions: {parse: []},
+                embeds: [{
+                  author: {name: $e.sender.login, icon_url: $e.sender.avatar_url},
+                  description: "**카테고리** : \($e.discussion.category.name)\n**제목** : [#\($e.discussion.number) \($e.discussion.title)](\($e.comment.html_url))\n**댓글** : \($e.comment.body | cut)",
+                  color: ($color | tonumber)
+                }]
+              }' | curl -sS --fail -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
+
+      - name: Wiki
+        if: github.event_name == 'gollum'
+        run: |
+          jq -n --slurpfile e "$GITHUB_EVENT_PATH" --arg color "$COLOR" '
+            $e[0] as $e
+            | {
+                allowed_mentions: {parse: []},
+                embeds: [ $e.pages[] | {
+                  title: (if .action == "created" then "🆕 위키 페이지가 추가됐어요: " else "✏️ 위키 페이지가 수정됐어요: " end) + .title,
+                  url: .html_url,
+                  description: (.summary // ""),
+                  color: ($color | tonumber),
+                  author: {name: $e.sender.login, icon_url: $e.sender.avatar_url}
+                }]
+              }' | curl -sS --fail -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
